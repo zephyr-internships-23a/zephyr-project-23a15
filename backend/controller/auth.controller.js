@@ -70,7 +70,7 @@ async function login(req, res) {
         { email: user.email, id: user._id, account_type: user.account_type },
         process.env.JWT_SECRET,
         {
-          expiresIn: "3d",
+          expiresIn: "1d",
         }
       );
       return res.status(200).json({
@@ -195,9 +195,112 @@ async function verifyEmail(req, res) {
   }
 }
 
+async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body;
+    const emailExist = await User.findOne({ email: email });
+    if (!emailExist) {
+      return res.status(400).json({
+        success: false,
+        message: "No such account exist!",
+        email_found: false,
+        email_verified: false,
+      });
+    }
+    if (emailExist && !emailExist.email_verified) {
+      return res.status(400).json({
+        success: false,
+        message: "This is not verified!",
+        email_found: true,
+        email_verified: false,
+      });
+    }
+    const token = jwt.sign(
+      { email: emailExist.email, id: emailExist._id },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "15m",
+      }
+    );
+    const info = await transporter.sendMail({
+      from: process.env.APP_EMAIL, // sender address
+      to: emailExist?.email || email, // list of receivers
+      subject: "Real State email verification", // Subject line
+      html:
+        " <p>This password reset link will be active only for 15 minutes.</p> <a href='http://localhost:5173/reset-password?token=" +
+        token +
+        "'>Verify</a>", // html body
+    });
+    if (!info.messageId) {
+      return res.status(400).json({
+        success: false,
+        message: "Failed to sent password reset link!",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Password reset link sent!",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "interval server error!",
+    });
+  }
+}
+
+async function resetPassword(req,res) {
+  try {
+    const { password, confirmPassword, token } = req.body;
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "No token provided!",
+        token_found: false,
+      });
+    }
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
+      const { email } = payload;
+      //check if new password is equal to old password
+      const user = await User.findOne({ email: email });
+      const isMatchPrevPass = await user.isValidatedPassword(password);
+      if (isMatchPrevPass) {
+        return res.status(400).json({
+          success: false,
+          message: "New password cannot be same as old password!",
+          token_found: true,
+        });
+      }
+      user.password = password;
+      await user.save();
+      return res.status(200).json({
+        success: true,
+        message: "Password reset successfully!",
+        token_found: true,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid token!",
+        token_found: true,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "interval server error!",
+    });
+  }
+}
+
 module.exports = {
   signup,
   sendVerification,
   login,
   verifyEmail,
+  forgotPassword,
+  resetPassword
 };

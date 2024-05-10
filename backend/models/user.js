@@ -28,12 +28,25 @@ const userSchema = new mongoose.Schema({
   },
   account_type: {
     type: String,
-    default: "user",
+    default: "user", //agent || admin
   },
   email_verified: {
     type: Boolean,
     default: false,
   },
+  phone: {
+    type: String
+  },
+  address: {
+    type: String
+  },
+  avatar: {
+    type: String,
+    default: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
+  },
+  avatar_id: {
+    type: String
+  }
 });
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

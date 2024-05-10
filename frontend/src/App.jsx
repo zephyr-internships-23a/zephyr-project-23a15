@@ -11,6 +11,11 @@ import { Toaster } from "react-hot-toast";
 import Verify from "./pages/Verify/Verify";
 import Home from "./pages/Home/Home";
 import { useStoreContext } from "./store/StoreProvider";
+import ForgetPassword from "./pages/ForgetPassword/ForgetPassword";
+import ResetPassword from "./pages/ResetPassword/ResetPassword";
+import Profile from "./pages/Profile/Profile";
+import BecomeAgent from "./pages/BecomeAgent/BecomeAgent";
+import EditProfile from "./pages/Profile/EditProfile";
 export default function App() {
   const { user } = useStoreContext();
   const { is_auth } = user;
@@ -36,6 +41,26 @@ export default function App() {
         <Route
           path="/verify"
           element={!is_auth ? <Verify /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/forgot-password"
+          element={!is_auth ? <ForgetPassword /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/reset-password"
+          element={!is_auth ? <ResetPassword /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/profile"
+          element={is_auth ? <Profile /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/become/agent"
+          element={is_auth ? <BecomeAgent /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/edit/profile"
+          element={is_auth ? <EditProfile /> : <Navigate to="/login" />}
         />
       </Routes>
       <Toaster />

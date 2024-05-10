@@ -46,7 +46,7 @@ export default function Login() {
           is_auth: true,
           token: response.data?.user?.token,
         });
-        navigate("/");
+        window.location.reload();
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || error?.data?.message);
@@ -138,6 +138,11 @@ export default function Login() {
             <h1>Don&apos;t have an account?</h1>
             <Link className="text-blue-500 font-semibold" to="/signup">
               Signup
+            </Link>
+          </div>
+          <div className=" mt-2">
+            <Link className="text-blue-500 font-semibold" to="/forgot-password">
+              Forgot password?
             </Link>
           </div>
         </CardContent>

@@ -7,8 +7,8 @@ export default function Navbar() {
   const { setUser } = useStoreContext();
 
   return (
-    <div className="flex font-poppins items-center justify-between px-4 py-4 bg-white dark:bg-gray-800">
-      <Link className="flex items-center gap-2" href="#">
+    <div className="flex font-poppins items-center justify-between py-4 bg-white dark:bg-gray-800">
+      <Link className="flex items-center gap-2" to='/'>
         <MountainIcon className="h-6 w-6" />
         <span className="text-lg font-semibold">Real State</span>
       </Link>
@@ -22,7 +22,7 @@ export default function Navbar() {
         <Link className="text-sm  hover:underline underline-offset-4" href="#">
           About
         </Link>
-        <Link className="text-sm  hover:underline underline-offset-4" href="#">
+        <Link className="text-sm  hover:underline underline-offset-4" to='/profile'>
           Profile
         </Link>
         <Button
@@ -52,7 +52,7 @@ export default function Navbar() {
           <div className="grid w-[200px] space-y-5 p-4">
             <Link
               className="text-sm  hover:underline underline-offset-4"
-              href="#"
+              to={'/'}
             >
               Home
             </Link>
@@ -70,7 +70,7 @@ export default function Navbar() {
             </Link>
             <Link
               className="text-sm  hover:underline underline-offset-4"
-              href="#"
+              to={'/profile'}
             >
               Profile
             </Link>
@@ -78,7 +78,7 @@ export default function Navbar() {
               variant="destructive"
               onClick={() => {
                 if (!window.confirm("Are you sure?")) return;
-                
+
                 localStorage.clear();
                 setUser({
                   is_auth: false,
