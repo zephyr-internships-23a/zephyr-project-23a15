@@ -16,6 +16,8 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useState } from "react";
 import { useStoreContext } from "@/store/StoreProvider";
+import { useQueryClient } from "@tanstack/react-query";
+import { REACT_QUERY } from "@/constants/reactQuery";
 const BASE_URI = import.meta.env.VITE_APP_BASE_API;
 const schema = yup.object().shape({
   email: yup.string().email().required(),
@@ -25,6 +27,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { setUser } = useStoreContext();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -38,14 +41,23 @@ export default function Login() {
       const response = await axios.post(`${BASE_URI}/login`, data);
       if (response.status == 200) {
         toast.success(response.data.message);
-        localStorage.setItem("id", JSON.stringify(response.data?.user?.id));
+        localStorage.setItem("id", response.data?.user?.id);
         localStorage.setItem("email", response.data?.user?.email);
         localStorage.setItem("token", response.data?.user?.token);
+        localStorage.setItem("account_type", response.data?.user?.account_type);
+
         setUser({
           id: response.data?.user?.id,
           is_auth: true,
           token: response.data?.user?.token,
+          account_type: response.data?.user?.account_type,
         });
+        queryClient.invalidateQueries({
+          queryKey: [REACT_QUERY.PROFILE],
+        });
+        if (response.data?.user?.account_type == "admin") {
+          return (window.location.href = "/admin/application");
+        }
         window.location.reload();
       }
     } catch (error) {

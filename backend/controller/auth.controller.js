@@ -10,6 +10,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.APP_EMAIL,
     pass: process.env.APP_PASSWORD,
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 async function signup(req, res) {
   try {
@@ -250,7 +253,7 @@ async function forgotPassword(req, res) {
   }
 }
 
-async function resetPassword(req,res) {
+async function resetPassword(req, res) {
   try {
     const { password, confirmPassword, token } = req.body;
     if (!token) {

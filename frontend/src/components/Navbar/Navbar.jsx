@@ -5,24 +5,40 @@ import { useStoreContext } from "@/store/StoreProvider";
 
 export default function Navbar() {
   const { setUser } = useStoreContext();
-
+  const { user } = useStoreContext();
   return (
     <div className="flex font-poppins items-center justify-between py-4 bg-white dark:bg-gray-800">
-      <Link className="flex items-center gap-2" to='/'>
+      <Link className="flex items-center gap-2" to="/">
         <MountainIcon className="h-6 w-6" />
-        <span className="text-lg font-semibold">Real State</span>
+        <span className="text-lg font-semibold">Real Estate</span>
       </Link>
       <div className="hidden lg:flex gap-6 items-center">
-        <Link className="text-sm  hover:underline underline-offset-4" href="#">
+        {user.account_type == "admin" && (
+          <Link
+            to={"/admin/application"}
+            className="text-sm  hover:underline underline-offset-4"
+          >
+            Admin
+          </Link>
+        )}
+        <Link
+          to="/"
+          className="text-sm  hover:underline underline-offset-4"
+          href="#"
+        >
           Home
         </Link>
-        <Link className="text-sm  hover:underline underline-offset-4" href="#">
+        <Link to='/smart-search' className="text-sm  hover:underline underline-offset-4" href="#">
           Smart Search
         </Link>
-        <Link className="text-sm  hover:underline underline-offset-4" href="#">
-          About
+        
+        <Link to='/chats' className="text-sm  hover:underline underline-offset-4" href="#">
+          Chats
         </Link>
-        <Link className="text-sm  hover:underline underline-offset-4" to='/profile'>
+        <Link
+          className="text-sm  hover:underline underline-offset-4"
+          to="/profile"
+        >
           Profile
         </Link>
         <Button
@@ -51,8 +67,14 @@ export default function Navbar() {
         <SheetContent side="left">
           <div className="grid w-[200px] space-y-5 p-4">
             <Link
+              to={"/admin/application"}
               className="text-sm  hover:underline underline-offset-4"
-              to={'/'}
+            >
+              Admin
+            </Link>
+            <Link
+              className="text-sm  hover:underline underline-offset-4"
+              to={"/"}
             >
               Home
             </Link>
@@ -70,7 +92,7 @@ export default function Navbar() {
             </Link>
             <Link
               className="text-sm  hover:underline underline-offset-4"
-              to={'/profile'}
+              to={"/profile"}
             >
               Profile
             </Link>

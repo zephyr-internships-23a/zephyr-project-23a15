@@ -1,58 +1,66 @@
+import { io } from "socket.io-client";
+import { REACT_QUERY } from "@/constants/reactQuery";
 import AxiosInstance from "@/utils/AxiosInstance";
-import { useState, useContext, createContext, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState, useContext, createContext, useEffect, useRef } from "react";
 // import { api_base_url } from "../CONSTANTS";
 const initialState = {
   user: {
     id: null,
     is_auth: false,
     token: "",
+    account_type: "",
   },
   setUser: () => { },
   user_data: {},
+  SocketClient: null
 };
 const AppContext = createContext(initialState);
 export default function StoreProvider({ children }) {
   const [user, setUser] = useState({
-    id: localStorage.getItem("id")
-      ? JSON.parse(localStorage.getItem("id"))
-      : null,
+    id: localStorage.getItem("id"),
     is_auth: localStorage.getItem("token") ? true : false,
-    token: "",
+    token: localStorage.getItem("token"),
+    account_type: localStorage.getItem("account_type"),
   });
+  const socketClient = useRef(null);
   const [user_data, setUser_data] = useState({});
   const sharedState = {
     user: user,
     setUser: setUser,
     user_data: user_data,
+    SocketClient: socketClient.current
   };
-  console.log(user)
+  const userData = useQuery({
+    queryKey: [REACT_QUERY.PROFILE],
+    queryFn: async () => {
+      const response = await AxiosInstance.get("/info");
+      return response.data;
+    },
+    retry: false,
+    enabled: user.token ? true : false,
+  });
   useEffect(() => {
-    async function checkAuthState() {
-      const id = localStorage.getItem("id")
-        ? JSON.parse(localStorage.getItem("id"))
-        : null;
-      const is_auth = localStorage.getItem("token") ? true : false;
-      const token = localStorage.getItem("token");
-      //implement get user functionality to retrieve current user data from token
-      //along with  checking the authenticity of the token
-      if (token) {
-        try {
-          const response = await AxiosInstance.get("/info");
-          if (response.status == 200) {
-            setUser_data(response.data?.user || {});
-          }
-        } catch (error) {
-          if (error?.response?.data?.expired) {
-            localStorage.clear();
-            window.location.reload();
-          }
-          console.log(error);
-        }
+    function updateUserData() {
+      if (userData?.isError && userData?.error?.response?.data?.expired) {
+        console.log(userData.error);
+        localStorage.clear();
+        setUser({
+          id: "",
+          is_auth: false,
+          token: "",
+          account_type: "",
+
+        });
+        window.location.reload();
+      } else {
+        setUser_data(userData?.data?.user || {});
       }
-      setUser({ id, is_auth, token });
     }
-    checkAuthState();
-  }, [user?.token]);
+    updateUserData();
+    socketClient.current = io('http://localhost:4000')
+  }, [userData?.data, userData.isError]);
+
   return (
     <AppContext.Provider value={sharedState}>{children}</AppContext.Provider>
   );

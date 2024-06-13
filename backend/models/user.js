@@ -46,8 +46,15 @@ const userSchema = new mongoose.Schema({
   },
   avatar_id: {
     type: String
+  },
+  application: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'application'
   }
+}, {
+  timestamps: true
 });
+
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
